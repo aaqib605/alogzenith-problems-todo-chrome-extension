@@ -39,8 +39,10 @@ async function addNewBookmark() {
   const problemUrl = window.location.href;
   const uniqueProblemId = extractUniqueProblemId(problemUrl);
 
-  if (existingBookmarks.find((bookmark) => bookmark.id === uniqueProblemId))
+  if (existingBookmarks.find((bookmark) => bookmark.id === uniqueProblemId)) {
+    showToast("Problem already bookmarked");
     return;
+  }
 
   const problemObj = {
     name: problemName,
@@ -52,6 +54,7 @@ async function addNewBookmark() {
 
   chrome.storage.sync.set({ AZ_PROBLEMS: updatedBookmarks }, () => {
     console.log("Problem added to bookmarks", updatedBookmarks);
+    showToast("Problem bookmarked successfully");
   });
 }
 
@@ -67,4 +70,48 @@ function extractUniqueProblemId(url) {
   const pathname = new URL(url).pathname;
   const segments = pathname.split("/");
   return segments.pop();
+}
+
+function showToast(message) {
+  const existingToast = document.getElementById("az-toast");
+  if (existingToast) existingToast.remove();
+
+  const toast = document.createElement("div");
+  toast.id = "az-toast";
+  toast.textContent = message;
+  toast.style.position = "fixed";
+  toast.style.top = "40px";
+  toast.style.right = "50%";
+  toast.style.transform = "translateX(50%)";
+  toast.style.background = "#00254d";
+  toast.style.color = "#fff";
+  toast.style.padding = "12px 24px";
+  toast.style.borderRadius = "8px";
+  toast.style.fontSize = "16px";
+  toast.style.boxShadow = "0 2px 8px rgba(0,0,0,0.15)";
+  toast.style.zIndex = 9999;
+  toast.style.opacity = 1;
+  toast.style.transition = "opacity 0.3s";
+  toast.style.overflow = "hidden";
+
+  const progress = document.createElement("div");
+  progress.style.position = "absolute";
+  progress.style.left = 0;
+  progress.style.bottom = 0;
+  progress.style.height = "4px";
+  progress.style.width = "100%";
+  progress.style.background = "#ffb300";
+  progress.style.transition = "none";
+  toast.appendChild(progress);
+
+  document.body.appendChild(toast);
+
+  void progress.offsetWidth;
+  progress.style.transition = "width 3s linear";
+  progress.style.width = "0%";
+
+  setTimeout(() => {
+    toast.style.opacity = 0;
+    toast.remove();
+  }, 3000);
 }
