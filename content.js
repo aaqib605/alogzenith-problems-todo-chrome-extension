@@ -1,3 +1,7 @@
+const observer = new MutationObserver(() => addBookmarkButton());
+
+observer.observe(document.body, { childList: true, subtree: true });
+
 addBookmarkButton();
 
 function addBookmarkButton() {
